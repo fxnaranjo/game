@@ -3,7 +3,7 @@
 //Runs once at the beginning
 function setup() {
     var googleSheetLink = "1f9ctZqIIHu5QFUSp-ZDEpHOv4nCBnLACKx_12-U25-I";
-    trivia.loadGoogleSheet(googleSheetLink).then(displayWelcome); 
+    loadGoogleSheet(googleSheetLink).then(displayWelcome); 
 
   }
   
@@ -17,14 +17,14 @@ function setup() {
     $("#question-screen").show();
     $("#correctAnswer").removeClass("highlight");
     $("#feedback").hide();
-    trivia.insertQuestionInfo();
-    trivia.shuffleAnswers();
+    insertQuestionInfo();
+    shuffleAnswers();
   }
   
   function displayThankyou() {
     $(".screen").hide();
     $("#thankyou-screen").show();
-    $("#game-results").html(`Obtuviste ${trivia.totalCorrect} de ${trivia.totalAnswered} respuestas correctas.`);
+    $("#game-results").html(`Obtuviste ${getCorrect()} de ${getAnswered()} respuestas correctas.`);
   }
   
   function onClickedAnswer(isCorrect) {
@@ -32,7 +32,7 @@ function setup() {
     else $("#feedback").html(`Incorrecto!`).show();
     $("#correctAnswer").addClass("highlight"); //highlight right answer
    // setTimeout(trivia.gotoNextQuestion, 3000); //wait 3 secs...next question
-   $("#feedback").append(`<br><button class="next-btn" onclick="trivia.gotoNextQuestion();">Siguiente</br>`);
+   $("#feedback").append(`<br><button class="next-btn" onclick="gotoNextQuestion();">Siguiente</br>`);
   }
   
   function onClickedStart() {
@@ -41,9 +41,9 @@ function setup() {
   
 
   function draw() {
-    if (trivia.state == "welcome") background("yellow");
-    else if (trivia.state == "question") background("lightblue");
-    else if (trivia.state == "correct") background("green");
-    else if (trivia.state == "incorrect") background("red");
-    else if (trivia.state == "thankyou") background("orange");
+    if (getState() == "welcome") background("yellow");
+    else if (getState() == "question") background("lightblue");
+    else if (getState() == "correct") background("green");
+    else if (getState()== "incorrect") background("red");
+    else if (getState() == "thankyou") background("orange");
   }

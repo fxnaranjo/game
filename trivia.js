@@ -1,3 +1,12 @@
+
+
+ var loadGoogleSheet,getCategories,
+ getUnfinishedCategories,gotoNextQuestion,insertCategoriesInfo,insertQuestionInfo,shuffleAnswers,startClickListeners,triggerAnswer
+ ,getState,getAnswered,getCorrect;
+
+(function () {
+
+   
 var trivia = {
     questions: [],
     currentCategory: null,
@@ -7,46 +16,64 @@ var trivia = {
     totalQuestions: 0,
     totalCorrect: 0,
     totalAnswered: 0,
-    state: "welcome",
-    loadGoogleSheet: function (link) {
+    state: "welcome"
+}
+
+     loadGoogleSheet= function (link) {
       return new Promise((resolve, reject) => {
         Tabletop.init({
           key: link,
           callback: data => {
-            this.questions = data.Sheet1.elements;
-            this.questions = shuffle(this.questions);
-            if (this.questions.length) this.currentQuestion = this.questions[0];
-            this.questionIndex = 0;
-            this.totalQuestions = this.questions.length;
-            this.totalCorrect = 0;
-            this.totalAnswered = 0;
-            this.state = "welcome";
-            this.startClickListeners();
+            trivia.questions = data.Sheet1.elements;
+            trivia.questions = shuffle(trivia.questions);
+            if (trivia.questions.length) trivia.currentQuestion = trivia.questions[0];
+            trivia.questionIndex = 0;
+            trivia.totalQuestions = trivia.questions.length;
+            trivia.totalCorrect = 0;
+            trivia.totalAnswered = 0;
+            trivia.state = "welcome";
+            startClickListeners();
             resolve("success");
           }
         });
       });
-    },
-    getCategories: function () {
+    }
+
+    getState =function(){
+        return trivia.state;
+    }
+
+    getCorrect=function(){
+        return trivia.totalCorrect;
+    }
+
+    getAnswered=function(){
+        return trivia.totalAnswered;
+    }
+
+     getCategories= function () {
       var cats = [];
-      this.questions.filter((q) => {
+      trivia.questions.filter((q) => {
         if (!cats.includes(q.category)) cats.push(q.category);
       });
       return cats;
-    },
-    getUnfinishedCategories: function () {
+    }
+
+     getUnfinishedCategories= function () {
       var cats = [];
-      this.questions.filter((q) => {
+      trivia.questions.filter((q) => {
         if (!cats.includes(q.category) && !q.response) cats.push(q.category);
       });
       return cats;
-    },
-    gotoNextQuestion: function () { //this just forwards a "deprecated function"
+    }
+
+     gotoNextQuestion= function () { //this just forwards a "deprecated function"
       displayQuestion();
-    },
-    insertCategoriesInfo: function () {
-      var cats = this.getCategories();
-      var unfcats = this.getUnfinishedCategories();
+    }
+
+    insertCategoriesInfo = function () {
+      var cats = trivia.getCategories();
+      var unfcats = trivia.getUnfinishedCategories();
       $('#category-set').html('');
       cats.forEach((c) => {
         var $catbtn = $(`<button class="category-btn">${c}</button>`);
@@ -59,13 +86,14 @@ var trivia = {
         else $catbtn.attr("disabled", true);
         $('#category-set').append($catbtn);
       })
-    },
-    insertQuestionInfo: function () {
+    }
+
+     insertQuestionInfo= function () {
       trivia.state = "question";
       $(".answer-btn").attr("disabled", null);
       trivia.questionIndex = trivia.questions.findIndex((q) => {
-        if (!this.categoriesEnabled) return !q.response;
-        else return !q.response && q.category == this.currentCategory;
+        if (!trivia.categoriesEnabled) return !q.response;
+        else return !q.response && q.category == trivia.currentCategory;
       });
       if (trivia.questions[trivia.questionIndex]) {
         trivia.currentQuestion = trivia.questions[trivia.questionIndex];
@@ -74,38 +102,41 @@ var trivia = {
         }
       }
       else {
-        if (this.totalAnswered == this.totalQuestions) {
+        if (trivia.totalAnswered == trivia.totalQuestions) {
           trivia.state = "thankyou";
           displayThankyou(); //game over
         }
-        else if (this.categoriesEnabled) {
+        else if (trivia.categoriesEnabled) {
           trivia.state = "categories";
           displayCategories();
         }
         else alert('Yikes');
       }
-    },
-    shuffleAnswers: function () {
+    }
+
+     shuffleAnswers= function () {
       $("#answer-set").html(shuffle($("#answer-set").children())); //shuffle answers
-    },
-    startClickListeners: function () {
+    }
+
+     startClickListeners= function () {
       //listen for answer button clicks
       $(".screen").on("click", ".answer-btn", ev => {
         $(".answer-btn").attr("disabled", "disabled"); //turn off buttons to prohibit cheating :)
-        trivia.triggerAnswer($(ev.target).is("#correctAnswer"));
+        triggerAnswer($(ev.target).is("#correctAnswer"));
       });
   
       //listen for restart button click
       $(".screen").on("click", ".start-btn", ev => {
-        this.questions.forEach(function (q) { delete q.response });
+        trivia.questions.forEach(function (q) { delete q.response });
         trivia.questionIndex = 0;
-        if (!this.categoriesEnabled) trivia.state = "question";
+        if (!trivia.categoriesEnabled) trivia.state = "question";
         else trivia.state = "categories";
         trivia.currentQuestion = trivia.questions[0]; //reset to the first question
         onClickedStart();
       });
-    },
-    triggerAnswer: function (correct) {
+    }
+
+     triggerAnswer= function (correct) {
       $(".answer-btn").attr("disabled", "disabled");
       if (correct) {
         trivia.currentQuestion.response = "correct";
@@ -122,5 +153,6 @@ var trivia = {
       }).length;
       onClickedAnswer(trivia.currentQuestion.response == "correct");
     }
-  };
   
+  
+})();
